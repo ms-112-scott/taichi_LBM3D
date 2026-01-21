@@ -2,22 +2,32 @@ import taichi as ti
 import numpy as np
 from pyevtk.hl import gridToVTK
 import time
+import yaml
+
+with open('config.yml', 'r') as f:
+    config = yaml.safe_load(f)
+
+sim_config = config['simulation']
 
 ti.init(arch=ti.cpu, dynamic_index=True, kernel_profiler=False, print_ir=False)
 
 enable_projection = True
-#nx,ny,nz = 100,50,5
-nx,ny,nz = 131,131,131
-fx,fy,fz = 0.0e-6,0.0,0.0
-niu = 0.1
 
-#Boundary condition mode: 0=periodic, 1= fix pressure, 2=fix velocity; boundary pressure value (rho); boundary velocity value for vx,vy,vz
-bc_x_left, rho_bcxl, vx_bcxl, vy_bcxl, vz_bcxl = 1, 1.0, 0.0e-5, 0.0, 0.0  #Boundary x-axis left side
-bc_x_right, rho_bcxr, vx_bcxr, vy_bcxr, vz_bcxr = 1, 0.995, 0.0, 0.0, 0.0  #Boundary x-axis left side
-bc_y_left, rho_bcyl, vx_bcyl, vy_bcyl, vz_bcyl = 0, 1.0, 0.0, 0.0, 0.0  #Boundary x-axis left side
-bc_y_right, rho_bcyr, vx_bcyr, vy_bcyr, vz_bcyr = 0, 1.0, 0.0, 0.0, 0.0  #Boundary x-axis left side
-bc_z_left, rho_bczl, vx_bczl, vy_bczl, vz_bczl = 0, 1.0, 0.0, 0.0, 0.0  #Boundary x-axis left side
-bc_z_right, rho_bczr, vx_bczr, vy_bczr, vz_bczr = 0, 1.0, 0.0, 0.0, 0.0  #Boundary x-axis left side
+nx,ny,nz = sim_config['nx'], sim_config['ny'], sim_config['nz']
+fx,fy,fz = sim_config['fx'], sim_config['fy'], sim_config['fz']
+niu = sim_config['niu']
+
+bc_x_left, rho_bcxl, vx_bcxl, vy_bcxl, vz_bcxl = sim_config['bc_x_left']['type'], sim_config['bc_x_left']['rho'], sim_config['bc_x_left']['vx'], sim_config['bc_x_left']['vy'], sim_config['bc_x_left']['vz']
+bc_x_right, rho_bcxr, vx_bcxr, vy_bcxr, vz_bcxr = sim_config['bc_x_right']['type'], sim_config['bc_x_right']['rho'], sim_config['bc_x_right']['vx'], sim_config['bc_x_right']['vy'], sim_config['bc_x_right']['vz']
+bc_y_left, rho_bcyl, vx_bcyl, vy_bcyl, vz_bcyl = sim_config['bc_y_left']['type'], sim_config['bc_y_left']['rho'], sim_config['bc_y_left']['vx'], sim_config['bc_y_left']['vy'], sim_config['bc_y_left']['vz']
+bc_y_right, rho_bcyr, vx_bcyr, vy_bcyr, vz_bcyr = sim_config['bc_y_right']['type'], sim_config['bc_y_right']['rho'], sim_config['bc_y_right']['vx'], sim_config['bc_y_right']['vy'], sim_config['bc_y_right']['vz']
+bc_z_left, rho_bczl, vx_bczl, vy_bczl, vz_bczl = sim_config['bc_z_left']['type'], sim_config['bc_z_left']['rho'], sim_config['bc_z_left']['vx'], sim_config['bc_z_left']['vy'], sim_config['bc_z_left']['vz']
+bc_z_right, rho_bczr, vx_bczr, vy_bczr, vz_bczr = sim_config['bc_z_right']['type'], sim_config['bc_z_right']['rho'], sim_config['bc_z_right']['vx'], sim_config['bc_z_right']['vy'], sim_config['bc_z_right']['vz']
+
+max_timestep = sim_config['max_timestep']
+output_frequency = sim_config['output_frequency']
+vtk_frequency = sim_config['vtk_frequency']
+
 
 
 f = ti.field(ti.f32,shape=(nx,ny,nz,19))
@@ -293,22 +303,21 @@ time_pre = time.time()
 dt_count = 0
 
 
-#solid_np = init_geo('./BC.dat')
-solid_np = init_geo('./img_ftb131.txt')
+solid_np = init_geo(sim_config['input_file'])
 solid.from_numpy(solid_np)
 
 static_init()
 init()
 
 
-for iter in range(50000+1):
+for iter in range(max_timestep + 1):
     colission()
     streaming1()
     Boundary_condition()
     #streaming2()
     streaming3()
 
-    if (iter%1000==0):
+    if (iter % output_frequency == 0):
 
         time_pre = time_now
         time_now = time.time()
@@ -322,7 +331,7 @@ for iter in range(50000+1):
         print('----------Time between two outputs is %dh %dm %ds; elapsed time is %dh %dm %ds----------------------' %(h_diff, m_diff, s_diff,h_elap,m_elap,s_elap))
         print('The %dth iteration, Max Force = %f,  force_scale = %f\n\n ' %(iter, 10.0,  10.0))
 
-        if (iter%10000==0):
+        if (iter % vtk_frequency == 0):
             gridToVTK(
                 "./structured"+str(iter),
                 x,
