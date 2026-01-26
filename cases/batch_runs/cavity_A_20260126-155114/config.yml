@@ -1,0 +1,24 @@
+case_name: cavity_A_20260126-155114
+simulation:
+  bc_type:
+  - 0
+  - 0
+  - 0
+  - 0
+  bc_value:
+  - - 0.0
+    - 0.0
+  - - 0.1
+    - 0.0
+  - - 0.0
+    - 0.0
+  - - 0.0
+    - 0.0
+  input_file: C:\Users\GAI\Desktop\Scott\taichi_LBM3D\cases\geometries_for_batch_2d\cavity_A.txt
+  max_timestep: 10000
+  niu: 0.0255
+  nx: 256
+  ny: 256
+  output_frequency: 200
+  zarr_data_path: zarr_data_user_2d
+  zarr_output_frequency: 100

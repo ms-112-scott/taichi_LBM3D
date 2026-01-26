@@ -1,5 +1,8 @@
 taichi>=1.0.2
 trimesh
 PyYAML
+scipy
+zarr
+
 
 

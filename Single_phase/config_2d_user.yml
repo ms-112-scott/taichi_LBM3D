@@ -1,0 +1,27 @@
+# Configuration for the Refactored User's 2D LBM Solver
+case_name: user_2d_cavity_test
+
+simulation:
+  # --- Domain and Geometry ---
+  input_file: "placeholder_geo.txt" # This will be overwritten by the batch runner
+  nx: 256
+  ny: 256
+
+  # --- Fluid Properties ---
+  niu: 0.0255 # Corresponds to Re=1000 for U=0.1, L=256
+
+  # --- Boundary Conditions [left, top, right, bottom] ---
+  # bc_type: 0 for Dirichlet (fixed velocity), 1 for Neumann (zero-gradient)
+  bc_type: [0, 0, 0, 0] 
+  # bc_value: Specify velocity for Dirichlet boundaries
+  bc_value: 
+    - [0.0, 0.0] # Left wall
+    - [0.1, 0.0] # Top wall (Lid)
+    - [0.0, 0.0] # Right wall
+    - [0.0, 0.0] # Bottom wall
+
+  # --- Timestepping and Output ---
+  max_timestep: 10000
+  output_frequency: 200 # Console print frequency
+  zarr_output_frequency: 100 # Frequency to save data to Zarr
+  zarr_data_path: "zarr_data_user_2d"

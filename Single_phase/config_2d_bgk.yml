@@ -1,0 +1,19 @@
+# Configuration for the 2D BGK LBM Solver
+case_name: cavity_2d_test
+
+simulation:
+  # --- Domain and Geometry ---
+  input_file: "geo_cavity_2d.txt"
+  nx: 200
+  ny: 200
+
+  # --- Fluid and Force Properties ---
+  niu: 0.01
+  fx: 0.0
+  fy: 0.0
+
+  # --- Timestepping and Output ---
+  max_timestep: 10000
+  output_frequency: 100 # Console print frequency
+  zarr_output_frequency: 50 # Frequency to save data to Zarr
+  zarr_data_path: "zarr_data_2d" # Output folder for Zarr data
