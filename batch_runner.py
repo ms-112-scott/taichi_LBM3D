@@ -95,6 +95,8 @@ def main(args):
             sub_env = os.environ.copy()
             site_packages_path = os.path.join(PROJECT_ROOT, ".venv", "Lib", "site-packages")
             sub_env['PYTHONPATH'] = f"{site_packages_path}{os.pathsep}{sub_env.get('PYTHONPATH', '')}"
+            # 強制子進程使用 UTF-8 編碼
+            sub_env['PYTHONIOENCODING'] = 'utf-8'
 
             result = subprocess.run(
                 command,
@@ -103,7 +105,8 @@ def main(args):
                 check=False,
                 cwd=working_dir,
                 env=sub_env,
-                encoding='utf-8' # 修正中文亂碼問題
+                encoding='utf-8',
+                errors='replace' # 如果仍有解碼錯誤，則替換無效字符
             )
             
             # --- e. 記錄結果 ---
